@@ -1,0 +1,145 @@
+service: thesis
+
+plugins:
+  - '@cellense/dotenv-plugin-serverless'
+  - serverless-webpack
+  - serverless-iam-roles-per-function
+  - serverless-pseudo-parameters
+  - serverless-stack-output
+  - serverless-offline # @note must be last plugin
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+  stage: ${opt:stage}
+  memorySize: 128
+
+custom:
+  serverless-iam-roles-per-function:
+    defaultInherit: true
+  generated:
+    ORGANIZATIONS_TABLE_NAME: ${self:service}-${self:provider.stage}-Organizations
+  webpack:
+    webpackConfig: 'serverless.webpack.config.js'
+    packager: yarn
+    includeModules:
+      forceExclude:
+        - aws-sdk 
+
+functions:
+  readAll:
+    handler: src/events/read-all.default
+    events:
+      - http:
+          path: all
+          method: get
+          cors: true
+    timeout: 15
+    environment:
+      STAGE: ${self:provider.stage}
+      ORGANIZATIONS_TABLE_NAME: ${self:custom.generated.ORGANIZATIONS_TABLE_NAME}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: logs:*
+        Resource: arn:aws:logs:*:*:*
+      - Effect: Allow
+        Action: dynamodb:*
+        Resource: '*'
+  read:
+    handler: src/events/read.default
+    events:
+      - http:
+          path: read
+          method: get
+          cors: true
+    timeout: 15
+    environment:
+      STAGE: ${self:provider.stage}
+      ORGANIZATIONS_TABLE_NAME: ${self:custom.generated.ORGANIZATIONS_TABLE_NAME}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: logs:*
+        Resource: arn:aws:logs:*:*:*
+      - Effect: Allow
+        Action: dynamodb:*
+        Resource: '*'
+  update:
+    handler: src/events/update.default
+    events:
+      - http:
+          path: update
+          method: post
+          cors: true
+    timeout: 15
+    environment:
+      STAGE: ${self:provider.stage}
+      ORGANIZATIONS_TABLE_NAME: ${self:custom.generated.ORGANIZATIONS_TABLE_NAME}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: logs:*
+        Resource: arn:aws:logs:*:*:*
+      - Effect: Allow
+        Action: dynamodb:*
+        Resource: '*'
+  delete:
+    handler: src/events/delete.default
+    events:
+      - http:
+          path: delete
+          method: post
+          cors: true
+    timeout: 15
+    environment:
+      STAGE: ${self:provider.stage}
+      ORGANIZATIONS_TABLE_NAME: ${self:custom.generated.ORGANIZATIONS_TABLE_NAME}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: logs:*
+        Resource: arn:aws:logs:*:*:*
+      - Effect: Allow
+        Action: dynamodb:*
+        Resource: '*'
+  create:
+    handler: src/events/create.default
+    events:
+      - http:
+          path: create
+          method: post
+          cors: true
+    timeout: 15
+    environment:
+      STAGE: ${self:provider.stage}
+      ORGANIZATIONS_TABLE_NAME: ${self:custom.generated.ORGANIZATIONS_TABLE_NAME}
+    iamRoleStatements:
+      - Effect: Allow
+        Action: logs:*
+        Resource: arn:aws:logs:*:*:*
+      - Effect: Allow
+        Action: dynamodb:*
+        Resource: '*'
+
+
+resources:
+  - Description: Master thesis AWS implementation example using serverless framework, stage - ${self:provider.stage}
+  - Resources:
+      OrganizationsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+          TableName: ${self:service}-${self:provider.stage}-Organizations
+          AttributeDefinitions:
+            - AttributeName: orgId
+              AttributeType: S
+            - AttributeName: name
+              AttributeType: S
+          KeySchema:
+            - AttributeName: orgId
+              KeyType: HASH
+            - AttributeName: name
+              KeyType: RANGE
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5

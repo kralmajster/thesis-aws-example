@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "sourceMap": true,
+    "baseUrl": "./",
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "lib": ["esnext"],
+    "skipLibCheck": true,
+    "downlevelIteration": true,
+    "paths": {
+      "@helpers": ["src/helpers.ts"],
+      "@types": ["types.ts"],
+    }
+  },
+  "include": [
+    "src/**/*",
+    "typings/**/*",
+    "_scripts/**/*"
+  ]
+}

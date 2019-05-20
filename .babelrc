@@ -1,0 +1,15 @@
+{
+  "presets": [
+    "@babel/preset-typescript",
+    ["@babel/preset-env", {
+      "targets": { "node": "8.10" },
+      "useBuiltIns": "usage",
+      "modules": false,
+      "loose": true
+    }]
+  ],
+  "plugins": [
+    "babel-plugin-node-source-map-support",
+    ["@babel/plugin-proposal-optional-catch-binding"]
+  ]
+}
